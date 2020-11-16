@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  pVpcId:
+    Type: AWS::EC2::VPC::Id
+  pSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  pKeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+Description: "A self-hosted instance of Former2 on EC2"
+Resources:
+  rEc2SecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupDescription: "Open to the world"
+      GroupName: "AllTraffic"
+      VpcId: !Ref pVpcId
+      SecurityGroupIngress: 
+      - 
+        CidrIp: "0.0.0.0/0"
+        Description: "Open to the world"
+        IpProtocol: "-1"
+      SecurityGroupEgress: 
+      - 
+        CidrIp: "0.0.0.0/0"
+        Description: "Open to the world"
+        IpProtocol: "-1"
+  rEc2Instance:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install git httpd -y
+          systemctl start httpd
+          systemctl enable httpd
+          cd /var/www/html
+          git clone https://github.com/iann0036/former2.git .
+      ImageId: "ami-0947d2ba12ee1ff75"
+      InstanceType: "t2.micro"
+      KeyName: !Ref pKeyPairName
+      Tenancy: "default"
+      SubnetId: !Ref pSubnetId
+      EbsOptimized: false
+      SecurityGroupIds: 
+      - !Ref rEc2SecurityGroup
+      SourceDestCheck: true
+      BlockDeviceMappings: 
+      - 
+        DeviceName: "/dev/xvda"
+        Ebs: 
+          Encrypted: false
+          VolumeSize: 8
+          VolumeType: "gp2"
+          DeleteOnTermination: true
+      HibernationOptions: 
+        Configured: false
