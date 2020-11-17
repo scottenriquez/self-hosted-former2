@@ -1,2 +1,1 @@
-# self-hosted-former2
-CloudFormation template for self-hosting a Former2 instance
+## Self-Hosted Former2 Instance CloudFormation Template

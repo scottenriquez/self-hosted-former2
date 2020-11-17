@@ -1,31 +1,34 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
+  pLatestAl2AmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
   pVpcId:
     Type: AWS::EC2::VPC::Id
   pSubnetId:
     Type: AWS::EC2::Subnet::Id
   pKeyPairName:
     Type: AWS::EC2::KeyPair::KeyName
-Description: "A self-hosted instance of Former2 on EC2"
+Description: A self-hosted instance of Former2 on EC2
 Resources:
   rEc2SecurityGroup:
-    Type: "AWS::EC2::SecurityGroup"
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: "Open to the world"
-      GroupName: "AllTraffic"
+      GroupDescription: Open to the world
+      GroupName: AllTraffic
       VpcId: !Ref pVpcId
       SecurityGroupIngress: 
       - 
-        CidrIp: "0.0.0.0/0"
-        Description: "Open to the world"
+        CidrIp: 0.0.0.0/0
+        Description: Open to the world
         IpProtocol: "-1"
       SecurityGroupEgress: 
       - 
-        CidrIp: "0.0.0.0/0"
-        Description: "Open to the world"
+        CidrIp: 0.0.0.0/0
+        Description: Open to the world
         IpProtocol: "-1"
   rEc2Instance:
-    Type: "AWS::EC2::Instance"
+    Type: AWS::EC2::Instance
     Properties:
       UserData:
         Fn::Base64: |
@@ -36,10 +39,10 @@ Resources:
           systemctl enable httpd
           cd /var/www/html
           git clone https://github.com/iann0036/former2.git .
-      ImageId: "ami-0947d2ba12ee1ff75"
-      InstanceType: "t2.micro"
+      ImageId: !Ref pLatestAl2AmiId 
+      InstanceType: t2.micro
       KeyName: !Ref pKeyPairName
-      Tenancy: "default"
+      Tenancy: default
       SubnetId: !Ref pSubnetId
       EbsOptimized: false
       SecurityGroupIds: 
@@ -47,11 +50,17 @@ Resources:
       SourceDestCheck: true
       BlockDeviceMappings: 
       - 
-        DeviceName: "/dev/xvda"
+        DeviceName: /dev/xvda
         Ebs: 
           Encrypted: false
           VolumeSize: 8
-          VolumeType: "gp2"
+          VolumeType: gp2
           DeleteOnTermination: true
       HibernationOptions: 
         Configured: false
+Outputs:
+  PublicIp:
+    Description: Former2 EC2 instance public IP address
+    Value: !GetAtt rEc2Instance.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIp"
