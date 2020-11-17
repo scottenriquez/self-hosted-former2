@@ -1,0 +1,22 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- '*'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- script: |
+    brew install cfn-lint
+    cfn-lint --version
+    cfn-lint ec2-template.yml
+  displayName: 'Install and run cfn-lint'
+- script: |
+    brew install ruby brew-gem
+    brew gem install cfn-nag
+    cfn_nag ec2-template.yml
+  displayName: 'Install and run cfn-nag'
