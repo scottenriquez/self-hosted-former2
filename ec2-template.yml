@@ -18,8 +18,8 @@ Resources:
   rEc2SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Open to the world
-      GroupName: AllTraffic
+      GroupDescription: Former2 security group 
+      GroupName: Former2 
       VpcId: !Ref pVpcId
       SecurityGroupIngress: 
       - 
